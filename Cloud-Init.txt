@@ -1,0 +1,13 @@
+#cloud-config
+write_files:
+- path: ~/wso.sh
+    content: |
+    #!/bin/bash
+
+    # update ubuntu
+    sudo apt-get update
+    # install nginx
+    sudo apt-get install tree
+    touch ~/Sample.txt
+runcmd:
+- ["sh", "~/wso.sh"]
