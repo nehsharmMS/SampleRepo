@@ -10,4 +10,4 @@ write_files:
     sudo apt-get install tree
     touch ~/Sample.txt
 runcmd:
-- ["sh", "~/wso.sh"]
+- ["bash", "~/wso.sh"]
