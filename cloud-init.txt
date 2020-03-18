@@ -8,6 +8,5 @@ write_files:
     sudo apt-get update
     # install nginx
     sudo apt-get install tree
-    touch ~/Sample.txt
 runcmd:
 - ["bash", "~/wso.sh"]
