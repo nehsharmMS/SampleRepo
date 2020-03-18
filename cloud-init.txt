@@ -8,5 +8,6 @@ write_files:
     sudo apt-get update
     # install nginx
     sudo apt-get install tree
+    sudo mkdir /run/neha
 runcmd:
 - ["bash", "~/wso.sh"]
