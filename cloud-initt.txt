@@ -1,3 +1,4 @@
+ #cloud-config
  cloud_final_modules:
  - rightscale_userdata
  - scripts-vendor
