@@ -1,0 +1,11 @@
+ cloud_final_modules:
+ - rightscale_userdata
+ - scripts-vendor
+ - scripts-per-once
+ - scripts-per-boot
+ - scripts-per-instance
+ - [scripts-user, always]
+ - ssh-authkey-fingerprints
+ - keys-to-console
+ - final-message
+ - power-state-change
