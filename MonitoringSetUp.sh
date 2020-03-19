@@ -30,8 +30,8 @@ then
  exit 1
 else
 # Tenant=AzTenant
-echo -e "\n###################################### Monitoring Setup For **$tenant** ######################################\n\n"
-echo -e "###################################### Installing Docker and Azure CLI ######################################\n\n"
+echo -e "\n###################################### Monitoring Setup For **$tenant** ########################################\n\n"
+echo -e "###################################### Installing Docker and Azure CLI #########################################\n\n"
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
@@ -41,7 +41,7 @@ apt-cache policy docker-ce
 sudo apt install docker-ce -y
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ######################################\n\n"
+echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ###########################\n\n"
 
 #sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
 sudo az acr login --name ghmccontainer --username $username -p $password
@@ -57,7 +57,7 @@ echo -e "\nError : Monitoring Image pull from ACR failed.Exiting the script..."
 exit 1
 fi
 ## Create Environment variable files for MDS and MDM
-echo -e "\n\n###################################### Creating Environment variable files for MDS and MDM ######################################\n\n"
+echo -e "\n\n###################################### Creating Environment variable files for MDS and MDM #####################\n\n"
 
 
         rm -f ~/collectd
@@ -115,7 +115,7 @@ EOT
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
 echo -e "Created env variables files for MDM and MDS\n"
 
-echo -e "\n\n###################################### Running and setting up container ######################################\n\n"
+echo -e "\n\n###################################### Running and setting up container ########################################\n\n"
 
 MyContainerId="$(sudo docker ps -aqf "name=monitor")"
 
