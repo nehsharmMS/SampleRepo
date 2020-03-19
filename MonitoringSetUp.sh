@@ -30,6 +30,8 @@ then
  exit 1
 else
 # Tenant=AzTenant
+echo "Info : Creating monitoring setup for Tenant : $tenant ..."
+
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
@@ -58,9 +60,9 @@ fi
 	cat <<EOT >> ~/collectd
 	# Setting Environment variables for Monitoring
 		 
-	export MONITORING_TENANT=$Tenant
+	export MONITORING_TENANT=$tenant
 	export MONITORING_ROLE=GHPI
-	export MONITORING_ROLE_INSTANCE=${Tenant}_1
+	export MONITORING_ROLE_INSTANCE=${tenant}_1
 EOT
  MDSD_ROLE_PREFIX=/var/run/mdsd/default
  MDSDLOG=/var/log
@@ -101,9 +103,9 @@ EOT
 	export MONITORING_CONFIG_VERSION=1.3
 
 	export MONITORING_USE_GENEVA_CONFIG_SERVICE=true
-        export MONITORING_TENANT=$Tenant
+        export MONITORING_TENANT=$tenant
         export MONITORING_ROLE=GHPI
-        export MONITORING_ROLE_INSTANCE=${Tenant}_1
+        export MONITORING_ROLE_INSTANCE=${tenant}_1
 EOT
 
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
