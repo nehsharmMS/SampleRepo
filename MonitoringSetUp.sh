@@ -30,7 +30,7 @@ then
  exit 1
 else
 # Tenant=AzTenant
-echo -e "\n###################################### Monitoring Setup For **$tenant** ########################################\n\n"
+echo -e "\n#################################### Monitoring Setup For **$tenant** ####################################\n\n"
 echo -e "###################################### Installing Docker and Azure CLI #########################################\n\n"
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
