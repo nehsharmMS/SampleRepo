@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -e
+
 ## Fetch Monitoring Docker image from Azure Container Registry 
 while getopts ":t:u:p:" opt; do
   case $opt in
@@ -15,12 +19,15 @@ done
 if [[ -z "$tenant" ]]
 then
 echo "Error : Tenant is not defined."
+exit 1
 elif [[ -z "$username" ]]
 then 
  echo "Error : Username for azure container registry is empty. Please provide username."
+ exit 1
 elif [[ -z "$password" ]]
 then 
  echo "Error : Password for azure container registry is empty. Please provide password."
+ exit 1
 else
 # Tenant=AzTenant
 sudo apt update
