@@ -18,20 +18,20 @@ done
 
 if [[ -z "$tenant" ]]
 then
-echo "Error : Tenant is not defined.Exiting the script..."
+echo -e "\nError : Tenant is not defined.Exiting the script..."
 exit 1
 elif [[ -z "$username" ]]
 then 
- echo "Error : Username for azure container registry is empty. Please provide username.Exiting the script..."
+ echo -e "\nError : Username for azure container registry is empty. Please provide username.Exiting the script..."
  exit 1
 elif [[ -z "$password" ]]
 then 
- echo "Error : Password for azure container registry is empty. Please provide password.Exiting the script..."
+ echo -e "\nError : Password for azure container registry is empty. Please provide password.Exiting the script..."
  exit 1
 else
 # Tenant=AzTenant
-echo "Info : Creating monitoring setup for Tenant : $tenant ..."
-
+echo -e "\n###################################### Monitoring Setup For **$tenant** ######################################\n\n"
+echo -e "###################################### Installing Docker and Azure CLI ######################################\n\n"
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
@@ -40,20 +40,24 @@ sudo apt update
 apt-cache policy docker-ce
 sudo apt install docker-ce -y
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ######################################\n\n"
+
 #sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
 sudo az acr login --name ghmccontainer --username $username -p $password
 
 if [[ $? -ne 0 ]] ; then
-echo "Error : Login to Azure Container registry failed. Either username or password incorrect.Exiting the script..."
+echo -e "\nError : Login to Azure Container registry failed. Either username or password incorrect.Exiting the script..."
 exit 1
 fi
 
 sudo docker pull ghmccontainer.azurecr.io/monitor:v5
 if [[ $? -ne 0 ]] ; then
-echo "Error : Monitoring Image pull from ACR failed.Exiting the script..."
+echo -e "\nError : Monitoring Image pull from ACR failed.Exiting the script..."
 exit 1
 fi
 ## Create Environment variable files for MDS and MDM
+echo -e "\n\n###################################### Creating Environment variable files for MDS and MDM ######################################\n\n"
 
 
         rm -f ~/collectd
@@ -109,17 +113,22 @@ EOT
 EOT
 
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
+echo -e "Created env variables files for MDM and MDS\n"
+
+echo -e "\n\n###################################### Running and setting up container ######################################\n\n"
 
 MyContainerId="$(sudo docker ps -aqf "name=monitor")"
 
+
 #echo $MyContainerId
-if [! -z "$MyContainerId" ]
+if [[ ! -z $MyContainerId ]]
 then
+echo -e "A container with id $MyContainerId is already running. Stopping the container...\n"
 sudo docker stop $MyContainerId
 fi
 
 if [[ $? -ne 0 ]] ; then
-echo "Error : Existing monitoring container failed to stop. Exiting the script..."
+echo -e "Error : Existing monitoring container failed to stop. Exiting the script..."
 exit 1
 fi
 
@@ -132,14 +141,17 @@ MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name 
 #retry=$(($retry-1))
 #done
 
-if [ -z "$MyContainerId" ]
+if [[ -z $MyContainerId ]]
 then
 echo "Error : Failed to run monitor container.Exiting the script..."
 exit 1
 fi
+echo -e "Monitoring container with Id $MyContainerId has started successfully...\n"
 
 	sudo docker cp ~/collectd $MyContainerId:/etc/default/collectd
 	sudo docker cp ~/mdsd $MyContainerId:/etc/default/mdsd
         sudo docker exec -itd $MyContainerId bash -c '/etc/init.d/cron start'
+	
+echo -e "Setting up of Monitoring container is successful.\n"
 fi
 
