@@ -109,11 +109,15 @@ EOT
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
 
 MyContainerId="$(sudo docker ps -aqf "name=monitor")"
+
 #echo $MyContainerId
-if [ -z "$MyContainerId" ]
-then 
-	MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
+if [! -z "$MyContainerId" ]
+then
+sudo docker stop $MyContainerId
 fi
+
+MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
+
 #retry=3;
 #while [-z "$MyContainerId" && $retry -gt 0]; 
 #do 
