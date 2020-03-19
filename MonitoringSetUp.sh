@@ -125,12 +125,15 @@ if [[ ! -z $MyContainerId ]]
 then
 echo -e "A container with id $MyContainerId is already running. Stopping the container...\n"
 sudo docker stop $MyContainerId
-fi
 
 if [[ $? -ne 0 ]] ; then
-echo -e "Error : Existing monitoring container failed to stop. Exiting the script..."
+echo -e "\nError : Existing monitoring container failed to stop. Exiting the script..."
 exit 1
 fi
+
+fi
+
+
 
 MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
 
@@ -146,7 +149,7 @@ then
 echo "Error : Failed to run monitor container.Exiting the script..."
 exit 1
 fi
-echo -e "Monitoring container with Id $MyContainerId has started successfully...\n"
+echo -e "\nMonitoring container with Id $MyContainerId has started successfully...\n"
 
 	sudo docker cp ~/collectd $MyContainerId:/etc/default/collectd
 	sudo docker cp ~/mdsd $MyContainerId:/etc/default/mdsd
