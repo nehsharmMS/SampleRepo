@@ -40,8 +40,17 @@ sudo apt install docker-ce -y
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 #sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
 sudo az acr login --name ghmccontainer --username $username -p $password
-sudo docker pull ghmccontainer.azurecr.io/monitor:v5
 
+if [[ $? -ne 0 ]] ; then
+echo "Error : Login to Azure Container registry failed. Either username or password incorrect."
+exit 1
+fi
+
+sudo docker pull ghmccontainer.azurecr.io/monitor:v5
+if [[ $? -ne 0 ]] ; then
+echo "Error : Monitoring Image pull from ACR failed."
+exit 1
+fi
 ## Create Environment variable files for MDS and MDM
 
 
@@ -100,10 +109,22 @@ EOT
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
 
 MyContainerId="$(sudo docker ps -aqf "name=monitor")"
-echo $MyContainerId
+#echo $MyContainerId
 if [ -z "$MyContainerId" ]
 then 
 	MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
+fi
+#retry=3;
+#while [-z "$MyContainerId" && $retry -gt 0]; 
+#do 
+#MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
+#retry=$(($retry-1))
+#done
+
+if [ -z "$MyContainerId" ]
+then
+echo "Error : Failed to run monitor container."
+exit 1
 fi
 
 	sudo docker cp ~/collectd $MyContainerId:/etc/default/collectd
