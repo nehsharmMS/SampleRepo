@@ -1,6 +1,84 @@
-    # update ubuntu
-    sudo apt-get update
-    # install nginx
-    sudo apt-get install tree
-    sudo mkdir /run/MonSetUp
-    # echo "Hello From Monitoring" > Mon.txt
+## Fetch Monitoring Docker image from Azure Container Registry 
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+sudo apt update
+apt-cache policy docker-ce
+sudo apt install docker-ce -y
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
+sudo docker pull ghmccontainer.azurecr.io/monitor:v5
+
+## Create Environment variable files for MDS and MDM
+
+if [[ -z "$Tenant" ]]
+then
+	        echo "Error : Tenant is not defined."
+else
+        rm -f ~/collectd
+	cat <<EOT >> ~/collectd
+	# Setting Environment variables for Monitoring
+		 
+	export MONITORING_TENANT=$Tenant
+	export MONITORING_ROLE=GHPI
+	export MONITORING_ROLE_INSTANCE=${Tenant}_1
+EOT
+ MDSD_ROLE_PREFIX=/var/run/mdsd/default
+ MDSDLOG=/var/log
+ MDSD_OPTIONS="-A -c /etc/mdsd.d/mdsd.xml -d -r $MDSD_ROLE_PREFIX -e $MDSDLOG/mdsd.err -w $MDSDLOG/mdsd.warn -o $MDSDLOG/mdsd.info"
+
+ rm -f ~/mdsd
+        cat <<EOT >> ~/mdsd
+
+	# Check 'mdsd -h' for details.
+
+	# MDSD_OPTIONS="-d -r ${MDSD_ROLE_PREFIX}"
+
+	MDSD_OPTIONS="-A -c /etc/mdsd.d/mdsd.xml -d -r $MDSD_ROLE_PREFIX -e $MDSDLOG/mdsd.err -w $MDSDLOG/mdsd.warn -o $MDSDLOG/mdsd.info"
+
+	export MONITORING_GCS_ENVIRONMENT=Test
+
+	export MONITORING_GCS_ACCOUNT=GHPILOGS
+
+	export MONITORING_GCS_REGION=westus
+
+	# or, pulling data from IMDS
+
+	# imdsURL="http://169.254.169.254/metadata/instance/compute/location?api-version=2017-04-02&format=text"
+
+	# export MONITORING_GCS_REGION="$(curl -H Metadata:True --silent $imdsURL)"
+
+
+	# see https://jarvis.dc.ad.msft.net/?section=b7a73824-bbbf-49fc-8c3e-a97c27a7659e&page=documents&id=66b7e29f-ddd6-4ab9-ad0a-dcd3c2561090
+	export MONITORING_GCS_CERT_CERTFILE=/etc/mdsd.d/gcscert.pem   # update for your cert on disk
+
+	export MONITORING_GCS_CERT_KEYFILE=/etc/mdsd.d/gcskey.pem     # update for your private key on disk
+
+
+	# Below are to enable GCS config download
+
+	export MONITORING_GCS_NAMESPACE=GHPILOGS
+
+	export MONITORING_CONFIG_VERSION=1.3
+
+	export MONITORING_USE_GENEVA_CONFIG_SERVICE=true
+        export MONITORING_TENANT=$Tenant
+        export MONITORING_ROLE=GHPI
+        export MONITORING_ROLE_INSTANCE=${Tenant}_1
+EOT
+
+## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
+
+MyContainerId="$(sudo docker ps -aqf "name=monitor")"
+echo $MyContainerId
+if [ -z "$MyContainerId" ]
+then 
+	MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
+fi
+
+	sudo docker cp ~/collectd $MyContainerId:/etc/default/collectd
+	sudo docker cp ~/mdsd $MyContainerId:/etc/default/mdsd
+    sudo docker exec -itd $MyContainerId bash -c '/etc/init.d/cron start'
+fi
+
