@@ -18,15 +18,15 @@ done
 
 if [[ -z "$tenant" ]]
 then
-echo "Error : Tenant is not defined."
+echo "Error : Tenant is not defined.Exiting the script..."
 exit 1
 elif [[ -z "$username" ]]
 then 
- echo "Error : Username for azure container registry is empty. Please provide username."
+ echo "Error : Username for azure container registry is empty. Please provide username.Exiting the script..."
  exit 1
 elif [[ -z "$password" ]]
 then 
- echo "Error : Password for azure container registry is empty. Please provide password."
+ echo "Error : Password for azure container registry is empty. Please provide password.Exiting the script..."
  exit 1
 else
 # Tenant=AzTenant
@@ -42,13 +42,13 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 sudo az acr login --name ghmccontainer --username $username -p $password
 
 if [[ $? -ne 0 ]] ; then
-echo "Error : Login to Azure Container registry failed. Either username or password incorrect."
+echo "Error : Login to Azure Container registry failed. Either username or password incorrect.Exiting the script..."
 exit 1
 fi
 
 sudo docker pull ghmccontainer.azurecr.io/monitor:v5
 if [[ $? -ne 0 ]] ; then
-echo "Error : Monitoring Image pull from ACR failed."
+echo "Error : Monitoring Image pull from ACR failed.Exiting the script..."
 exit 1
 fi
 ## Create Environment variable files for MDS and MDM
@@ -116,6 +116,11 @@ then
 sudo docker stop $MyContainerId
 fi
 
+if [[ $? -ne 0 ]] ; then
+echo "Error : Existing monitoring container failed to stop. Exiting the script..."
+exit 1
+fi
+
 MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
 
 #retry=3;
@@ -127,7 +132,7 @@ MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name 
 
 if [ -z "$MyContainerId" ]
 then
-echo "Error : Failed to run monitor container."
+echo "Error : Failed to run monitor container.Exiting the script..."
 exit 1
 fi
 
