@@ -51,7 +51,7 @@ echo -e "\nError : Login to Azure Container registry failed. Either username or 
 exit 1
 fi
 
-sudo docker pull ghmccontainer.azurecr.io/monitor:v5
+sudo docker pull ghmccontainer.azurecr.io/monitor:latest
 if [[ $? -ne 0 ]] ; then
 echo -e "\nError : Monitoring Image pull from ACR failed.Exiting the script..."
 exit 1
@@ -135,7 +135,7 @@ fi
 
 
 
-MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
+MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:latest)"
 
 #retry=3;
 #while [-z "$MyContainerId" && $retry -gt 0]; 
