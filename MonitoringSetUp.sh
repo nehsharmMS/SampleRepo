@@ -1,5 +1,28 @@
 ## Fetch Monitoring Docker image from Azure Container Registry 
-Tenant=AzTenant
+while getopts ":t:u:p:" opt; do
+  case $opt in
+    t) tenant="$OPTARG"
+    ;;
+    u) username="$OPTARG"
+    ;;
+    p) password="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    ;;
+  esac
+done
+
+if [[ -z "$tenant" ]]
+then
+echo "Error : Tenant is not defined."
+elif [[ -z "$username" ]]
+then 
+ echo "Error : Username for azure container registry is empty. Please provide username."
+elif [[ -z "$password" ]]
+then 
+ echo "Error : Password for azure container registry is empty. Please provide password."
+else
+# Tenant=AzTenant
 sudo apt update
 sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common -y
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
@@ -8,15 +31,13 @@ sudo apt update
 apt-cache policy docker-ce
 sudo apt install docker-ce -y
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
+#sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
+sudo az acr login --name ghmccontainer --username $username -p $password
 sudo docker pull ghmccontainer.azurecr.io/monitor:v5
 
 ## Create Environment variable files for MDS and MDM
 
-if [[ -z "$Tenant" ]]
-then
-	        echo "Error : Tenant is not defined."
-else
+
         rm -f ~/collectd
 	cat <<EOT >> ~/collectd
 	# Setting Environment variables for Monitoring
@@ -80,6 +101,6 @@ fi
 
 	sudo docker cp ~/collectd $MyContainerId:/etc/default/collectd
 	sudo docker cp ~/mdsd $MyContainerId:/etc/default/mdsd
-    sudo docker exec -itd $MyContainerId bash -c '/etc/init.d/cron start'
+        sudo docker exec -itd $MyContainerId bash -c '/etc/init.d/cron start'
 fi
 
