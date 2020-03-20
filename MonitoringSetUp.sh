@@ -16,18 +16,10 @@ while getopts ":t:u:p:" opt; do
   esac
 done
 
-if [[ -z "$tenant" ]]
+if [[ -z "$tenant" || -z "$username" || -z "$password" ]]
 then
-echo -e "\nError : Tenant is not defined.Exiting the script..."
+echo -e "\nError : Tenant, ACR username and password are mandatory arguments.Please provide required arguments to setup monitoring pipeline.Exiting the script..."
 exit 1
-elif [[ -z "$username" ]]
-then 
- echo -e "\nError : Username for azure container registry is empty. Please provide username.Exiting the script..."
- exit 1
-elif [[ -z "$password" ]]
-then 
- echo -e "\nError : Password for azure container registry is empty. Please provide password.Exiting the script..."
- exit 1
 else
 # Tenant=AzTenant
 echo -e "\n#################################### Monitoring Setup For **$tenant** ####################################\n\n"
