@@ -38,16 +38,8 @@ echo -e "\n\n###################################### Logging into ACR and Pulling
 #sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
 sudo az acr login --name ghmccontainer --username $username -p $password
 
-if [[ $? -ne 0 ]] ; then
-echo -e "\nError : Login to Azure Container registry failed. Either username or password incorrect.Exiting the script..."
-exit 1
-fi
-
 sudo docker pull ghmccontainer.azurecr.io/monitor:latest
-if [[ $? -ne 0 ]] ; then
-echo -e "\nError : Monitoring Image pull from ACR failed.Exiting the script..."
-exit 1
-fi
+
 ## Create Environment variable files for MDS and MDM
 echo -e "\n\n###################################### Creating Environment variable files for MDS and MDM #####################\n\n"
 
@@ -111,30 +103,14 @@ echo -e "\n\n###################################### Running and setting up conta
 
 MyContainerId="$(sudo docker ps -aqf "name=monitor")"
 
-
 #echo $MyContainerId
 if [[ ! -z $MyContainerId ]]
 then
 echo -e "A container with id $MyContainerId is already running. Stopping the container...\n"
 sudo docker stop $MyContainerId
-
-if [[ $? -ne 0 ]] ; then
-echo -e "\nError : Existing monitoring container failed to stop. Exiting the script..."
-exit 1
 fi
-
-fi
-
-
 
 MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:latest)"
-
-#retry=3;
-#while [-z "$MyContainerId" && $retry -gt 0]; 
-#do 
-#MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:v5)"
-#retry=$(($retry-1))
-#done
 
 if [[ -z $MyContainerId ]]
 then
