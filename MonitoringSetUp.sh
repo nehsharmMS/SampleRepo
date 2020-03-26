@@ -64,13 +64,13 @@ else
 
 
 sudo rm -f /tmp/collectd
-cat > /tmp/collectd <<EOL
+cat > /tmp/collectd <<EOT
 # Setting Environment variables for Monitoring
 		 
 export MONITORING_TENANT=$tenant
 export MONITORING_ROLE=GHPI
 export MONITORING_ROLE_INSTANCE=${tenant}_1
-EOL
+EOT
 
 MDSD_ROLE_PREFIX=/var/run/mdsd/default
 MDSDLOG=/var/log
@@ -79,17 +79,28 @@ MDSD_OPTIONS="-A -c /etc/mdsd.d/mdsd.xml -d -r $MDSD_ROLE_PREFIX -e $MDSDLOG/mds
 sudo rm -f /tmp/mdsd
 cat > /tmp/mdsd <<EOT
 	# Check 'mdsd -h' for details.
+
 	# MDSD_OPTIONS="-d -r ${MDSD_ROLE_PREFIX}"
+
 	MDSD_OPTIONS="-A -c /etc/mdsd.d/mdsd.xml -d -r $MDSD_ROLE_PREFIX -e $MDSDLOG/mdsd.err -w $MDSDLOG/mdsd.warn -o $MDSDLOG/mdsd.info"
+
 	export MONITORING_GCS_ENVIRONMENT=Test
+
 	export MONITORING_GCS_ACCOUNT=GHPILOGS
+
 	export MONITORING_GCS_REGION=westus
 	# or, pulling data from IMDS
+
 	# imdsURL="http://169.254.169.254/metadata/instance/compute/location?api-version=2017-04-02&format=text"
+
 	# export MONITORING_GCS_REGION="$(curl -H Metadata:True --silent $imdsURL)"
+
 	# see https://jarvis.dc.ad.msft.net/?section=b7a73824-bbbf-49fc-8c3e-a97c27a7659e&page=documents&id=66b7e29f-ddd6-4ab9-ad0a-dcd3c2561090
+
 	export MONITORING_GCS_CERT_CERTFILE="$GCS_CERT"   # update for your cert on disk
+
 	export MONITORING_GCS_CERT_KEYFILE="$GCS_KEY"     # update for your private key on disk
+	
 	# Below are to enable GCS config download
 	export MONITORING_GCS_NAMESPACE=GHPILOGS
 	export MONITORING_CONFIG_VERSION=1.3
