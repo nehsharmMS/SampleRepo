@@ -35,7 +35,6 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ###########################\n\n"
 
-#sudo az acr login --name ghmccontainer --username de8fa398-1807-4970-9506-e409b61dc2eb -p 1P-R@bGzozi6=eAFDGe9yB=nZ0gmY?0D 
 sudo az acr login --name ghmccontainer --username $username -p $password
 
 sudo docker pull ghmccontainer.azurecr.io/monitor:latest
