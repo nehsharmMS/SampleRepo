@@ -152,9 +152,9 @@ fi
 
 echo -e "Cleaning up certs and keys from the VM\n"
 if [ -f "$GCS_CERT" ]; then
-	sudo rm -f "$GCS_CERT"
+    sudo rm -f "$GCS_CERT"
 fi
 
 if [ -f "$GCS_KEY" ]; then
-	sudo rm -f "$GCS_KEY"
+    sudo rm -f "$GCS_KEY"
 fi
