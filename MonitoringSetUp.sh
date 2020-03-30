@@ -45,18 +45,26 @@ else
    GCS_CERT=$GCS_CERT_FOLDER/gcscert.pem
    GCS_KEY=$GCS_CERT_FOLDER/gcskey.pem
 
+   echo -e "Cleaning up existing geneva auth certificate and private key if any"
    if [ -f "$GCS_CERT" ]; then
+      echo -e "Removing existing Geneva auth certificate: $GCS_CERT"
       sudo rm -f "$GCS_CERT"
    fi
 
    if [ -f "$GCS_KEY" ]; then
+      echo -e "Removing existing Geneva auth key: $GCS_KEY"
       sudo rm -f "$GCS_KEY"
    fi
 
    if [ -f "$GCS_CERT_WITH_KEY" ]; then
+      echo -e "Extracting Geneva auth certificate and key from the file: $GCS_CERT_WITH_KEY"
       sudo openssl x509 -in "$GCS_CERT_WITH_KEY" -out "$GCS_CERT"  && sudo chmod 744 "$GCS_CERT" 
-      sudo openssl pkey -in "$GCS_CERT_WITH_KEY" -out "$GCS_KEY" && sudo chmod 744 "$GCS_KEY" 
+      sudo openssl pkey -in "$GCS_CERT_WITH_KEY" -out "$GCS_KEY" && sudo chmod 744 "$GCS_KEY"
+      
+      echo -e "Removing '$GCS_CERT_WITH_KEY' from the host VM"
       sudo rm -f "$GCS_CERT_WITH_KEY" 
+     else 
+       echo -e "Unable to find the Geneva certificate-key file : $GCS_CERT_WITH_KEY. Skipping the certificate and key extraction.."
    fi
     
     ## Create Environment variable files for MDS and MDM
@@ -141,6 +149,8 @@ MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name 
       echo -e "Copying cert and key to the monitoring container"
       sudo docker cp "$GCS_CERT" $MyContainerId:"$GCS_CERT"     
       sudo docker cp "$GCS_KEY" $MyContainerId:"$GCS_KEY"
+     else 
+       echo -e "Skipping copying of cert and auth file to the container as cert-key file: $GCS_CERT_WITH_KEY doesn't exist."
     fi
     
     sudo docker cp /tmp/collectd $MyContainerId:/etc/default/collectd
@@ -152,9 +162,11 @@ fi
 
 echo -e "Cleaning up certs and keys from the VM\n"
 if [ -f "$GCS_CERT" ]; then
+    echo -e "Cleaning up Geneva agents auth cert file: $GCS_CERT from the host VM"
     sudo rm -f "$GCS_CERT"
 fi
 
 if [ -f "$GCS_KEY" ]; then
+    echo -e "Cleaning up Geneva agents auth cert file: $GCS_KEY from the host VM"
     sudo rm -f "$GCS_KEY"
 fi
