@@ -59,10 +59,7 @@ else
    if [ -f "$GCS_CERT_WITH_KEY" ]; then
       echo -e "Extracting Geneva auth certificate and key from the file: $GCS_CERT_WITH_KEY"
       sudo openssl x509 -in "$GCS_CERT_WITH_KEY" -out "$GCS_CERT"  && sudo chmod 744 "$GCS_CERT" 
-      sudo openssl pkey -in "$GCS_CERT_WITH_KEY" -out "$GCS_KEY" && sudo chmod 744 "$GCS_KEY"
-      
-      echo -e "Removing '$GCS_CERT_WITH_KEY' from the host VM"
-      sudo rm -f "$GCS_CERT_WITH_KEY" 
+      sudo openssl pkey -in "$GCS_CERT_WITH_KEY" -out "$GCS_KEY" && sudo chmod 744 "$GCS_KEY"      
      else 
        echo -e "Unable to find the Geneva certificate-key file : $GCS_CERT_WITH_KEY. Skipping the certificate and key extraction.."
    fi
@@ -161,6 +158,12 @@ MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name 
 fi
 
 echo -e "Cleaning up certs and keys from the VM\n"
+
+if  [ -f "$GCS_CERT_WITH_KEY" ]; then
+   echo -e "Removing '$GCS_CERT_WITH_KEY' from the host VM"
+   sudo rm -f "$GCS_CERT_WITH_KEY"
+fi
+
 if [ -f "$GCS_CERT" ]; then
     echo -e "Cleaning up Geneva agents auth cert file: $GCS_CERT from the host VM"
     sudo rm -f "$GCS_CERT"
