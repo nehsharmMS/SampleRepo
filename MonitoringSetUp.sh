@@ -35,10 +35,10 @@ else
 
   echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ###########################\n\n"
 
-  sudo az acr login --name ghpiamecontainer --username $username -p $password
+  sudo az acr login --name ghmccontainer --username $username -p $password
 
-  ## sudo docker pull ghmccontainer.azurecr.io/monitor:latest 
-  sudo docker pull ghpiamecontainer.azurecr.io/monitor:latest
+  sudo docker pull ghmccontainer.azurecr.io/monitor:latest 
+  ##sudo docker pull ghpiamecontainer.azurecr.io/monitor:latest
 
    echo -e "Converting pem file to cert and private key file...."
    GCS_CERT_FOLDER=/gcscerts
@@ -130,7 +130,7 @@ echo -e "A container with id $MyContainerId is already running. Stopping the con
 sudo docker stop $MyContainerId
 fi
 
-MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghpiamecontainer.azurecr.io/monitor:latest)"
+MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:latest)"
 
   if [[ -z $MyContainerId ]]
   then
