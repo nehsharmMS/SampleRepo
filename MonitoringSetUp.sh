@@ -3,7 +3,7 @@
 set -e
 
 ## Fetch Monitoring Docker image from Azure Container Registry 
-while getopts ":t:u:p:" opt; do
+while getopts ":t:u:p:r:" opt; do
   case $opt in
     t) tenant="$OPTARG"
     ;;
@@ -78,6 +78,13 @@ cat > /tmp/collectd <<EOT
 export MONITORING_TENANT=$tenant
 export MONITORING_ROLE=GHPI
 export MONITORING_ROLE_INSTANCE=${tenant}_1
+
+if [ $isReplica = "true" ] || [ $isReplica = "True" ] ; then
+{
+	export MONITORING_ROLE_INSTANCE=${tenant}_2
+}
+fi
+
 EOT
 
 MDSD_ROLE_PREFIX=/var/run/mdsd/default
@@ -117,13 +124,11 @@ cat > /tmp/mdsd <<EOT
     export MONITORING_ROLE=GHPI
     export MONITORING_ROLE_INSTANCE=${tenant}_1
     
-    if($isReplica == true) then
+    if [ $isReplica = "true" ] || [ $isReplica = "True" ] ; then
     {
       export MONITORING_ROLE_INSTANCE=${tenant}_2
     }
     fi
-    
-    export -p
     
 EOT
 
