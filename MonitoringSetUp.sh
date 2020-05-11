@@ -11,6 +11,8 @@ while getopts ":t:u:p:" opt; do
     ;;
     p) password="$OPTARG"
     ;;
+    r) isReplica="$OPTARG"
+    ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
@@ -114,6 +116,15 @@ cat > /tmp/mdsd <<EOT
     export MONITORING_TENANT=$tenant
     export MONITORING_ROLE=GHPI
     export MONITORING_ROLE_INSTANCE=${tenant}_1
+    
+    if($isReplica == true) then
+    {
+      export MONITORING_ROLE_INSTANCE=${tenant}_2
+    }
+    fi
+    
+    export -p
+    
 EOT
 
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
