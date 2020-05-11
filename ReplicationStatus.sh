@@ -14,10 +14,10 @@ done
 
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-echo "$PATH"
-echo "$tenant"
-echo "$genevaAccount"
-echo "$roleInstance"
+echo "Path: $PATH"
+echo "Tenant: $tenant"
+echo "GenevaAccount: $genevaAccount"
+echo "RoleInstance: $roleInstance"
 
 ghe-repl-status
 
