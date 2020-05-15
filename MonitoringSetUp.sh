@@ -3,7 +3,7 @@
 set -e
 
 ## Fetch Monitoring Docker image from Azure Container Registry 
-while getopts ":t:u:p:r:" opt; do
+while getopts ":t:u:p:r:v:f:n:e:a:" opt; do
   case $opt in
     t) tenant="$OPTARG"
     ;;
@@ -11,16 +11,26 @@ while getopts ":t:u:p:r:" opt; do
     ;;
     p) password="$OPTARG"
     ;;
-    r) isReplica="$OPTARG"
+    r) monitoring_role="$OPTARG"
+    ;;
+    v) config_version="$OPTARG"
+    ;;
+    f) front_end_url="$OPTARG"
+    ;;
+    n) monitoring_namespace="$OPTARG"
+    ;;
+    e) monitoring_environment="$OPTARG"
+    ;;
+    a) monitoring_account="$OPTARG"
     ;;
     \?) echo "Invalid option -$OPTARG" >&2
     ;;
   esac
 done
 
-if [[ -z "$tenant" || -z "$username" || -z "$password" ]]
+if [[ -z "$tenant" || -z "$username" || -z "$password" || -z "$monitoring_role" || -z "$config_version" || -z "$front_end_url" || -z "$monitoring_namespace" || -z "$monitoring_environment" || -z "$monitoring_account"]]
 then
-  echo -e "\nError : Tenant, ACR username and password are mandatory arguments.Please provide required arguments to setup monitoring pipeline.Exiting the script..."
+  echo -e "\nError : All the above arguments like Tenant, ACR username , password etc.. are mandatory arguments.Please provide required arguments to setup monitoring pipeline.Exiting the script..."
   exit 1
 else
   # Tenant=AzTenant
@@ -37,10 +47,12 @@ else
 
   echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ###########################\n\n"
 
+  ## sudo az acr login --name ghpiamecontainer --username $username -p $password
   sudo az acr login --name ghmccontainer --username $username -p $password
 
-  sudo docker pull ghmccontainer.azurecr.io/monitor:latest 
-  ##sudo docker pull ghpiamecontainer.azurecr.io/monitor:latest
+  ##sudo docker pull ghmccontainer.azurecr.io/monitor:latest 
+  ## sudo docker pull ghpiamecontainer.azurecr.io/monitor:latest
+  sudo docker pull ghmccontainer.azurecr.io/monitor_ghpi:latest
 
    echo -e "Converting pem file to cert and private key file...."
    GCS_CERT_FOLDER=/gcscerts
@@ -70,21 +82,14 @@ else
     ## Create Environment variable files for MDS and MDM
     echo -e "\n\n###################################### Creating Environment variable files for MDS and MDM #####################\n\n"
 
-
+echo "export FRONT_END_URL=$front_end_url" > EnvVariables.sh 
 sudo rm -f /tmp/collectd
 cat > /tmp/collectd <<EOT
 # Setting Environment variables for Monitoring
          
 export MONITORING_TENANT=$tenant
-export MONITORING_ROLE=GHPI
+export MONITORING_ROLE=$monitoring_role
 export MONITORING_ROLE_INSTANCE=${tenant}_1
-
-if [ $isReplica = "true" ] || [ $isReplica = "True" ] ; then
-{
-	export MONITORING_ROLE_INSTANCE=${tenant}_2
-}
-fi
-
 EOT
 
 MDSD_ROLE_PREFIX=/var/run/mdsd/default
@@ -99,9 +104,9 @@ cat > /tmp/mdsd <<EOT
 
     MDSD_OPTIONS="-A -c /etc/mdsd.d/mdsd.xml -d -r $MDSD_ROLE_PREFIX -e $MDSDLOG/mdsd.err -w $MDSDLOG/mdsd.warn -o $MDSDLOG/mdsd.info"
 
-    export MONITORING_GCS_ENVIRONMENT=Test
+    export MONITORING_GCS_ENVIRONMENT=$monitoring_environment
 
-    export MONITORING_GCS_ACCOUNT=GHPILOGS
+    export MONITORING_GCS_ACCOUNT=$monitoring_account
 
     export MONITORING_GCS_REGION=westus
     # or, pulling data from IMDS
@@ -117,19 +122,12 @@ cat > /tmp/mdsd <<EOT
     export MONITORING_GCS_CERT_KEYFILE="$GCS_KEY"     # update for your private key on disk
     
     # Below are to enable GCS config download
-    export MONITORING_GCS_NAMESPACE=GHPILOGS
-    export MONITORING_CONFIG_VERSION=1.3
+    export MONITORING_GCS_NAMESPACE=$monitoring_namespace
+    export MONITORING_CONFIG_VERSION=$config_version
     export MONITORING_USE_GENEVA_CONFIG_SERVICE=true
     export MONITORING_TENANT=$tenant
-    export MONITORING_ROLE=GHPI
+    export MONITORING_ROLE=$monitoring_role
     export MONITORING_ROLE_INSTANCE=${tenant}_1
-    
-    if [ $isReplica = "true" ] || [ $isReplica = "True" ] ; then
-    {
-      export MONITORING_ROLE_INSTANCE=${tenant}_2
-    }
-    fi
-    
 EOT
 
 ## Run container using Monitoring image, if not running already. Copy above created env variable files to container and start the cron job on running container..
@@ -146,8 +144,9 @@ echo -e "A container with id $MyContainerId is already running. Stopping the con
 sudo docker stop $MyContainerId
 fi
 
-MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghmccontainer.azurecr.io/monitor:latest)"
 
+## MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor ghpiamecontainer.azurecr.io/monitor:latest)"
+MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name monitor_ghpi ghmccontainer.azurecr.io/monitor_ghpi:latest)"
   if [[ -z $MyContainerId ]]
   then
     echo "Error : Failed to run monitor container.Exiting the script..."
@@ -155,6 +154,7 @@ MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name 
   fi
 
   echo -e "\nMonitoring container with Id $MyContainerId has started successfully...\n"
+  sudo docker cp EnvVariables.sh $MyContainerId:root/EnvVariables.sh
     
     if [ -f "$GCS_CERT_WITH_KEY" ]; then
       echo -e "Creating $GCS_CERT_FOLDER in the monitoring container"   
