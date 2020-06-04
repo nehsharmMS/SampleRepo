@@ -11,17 +11,11 @@ key="$1"
         shift
         echo "Tenant: $tenant"
         ;;
-    --username)  
-        username=$2
+    --vmManagedUserId)  
+        vmManagedUserId=$2
         shift
         shift
-        echo "username: $username"
-        ;;
-    --password)  
-        password=$2
-        shift
-        shift
-        echo "password: $password"
+        echo "vmManagedUserId: $vmManagedUserId"
         ;;
     --monitoringRole)  
         monitoring_role=$2
@@ -90,15 +84,9 @@ then
     exit 1
 fi
 
-if [[ -z "$username" ]]
+if [[ -z "$vmManagedUserId" ]]
 then 
-    echo "\nError: username is mandatory. Please provide username to setup monitoring pipeline. Exiting the script."
-    exit 1
-fi
-
-if [[ -z "$password" ]]
-then 
-    echo "\\nError: password is mandatory. Please provide password to setup monitoring pipeline. Exiting the script."
+    echo "\nError: vmManagedUserId is mandatory. Please provide vmManagedUserId to setup monitoring pipeline. Exiting the script."
     exit 1
 fi
 
@@ -164,7 +152,8 @@ fi
 
   echo -e "\n\n###################################### Logging into ACR and Pulling Monitoring Image ###########################\n\n"
 
-  sudo az acr login --name $container_registry --username $username -p $password
+  sudo az login --identity --username $vmManagedUserId
+  sudo az acr login --name $container_registry
   container_name=$container_registry".azurecr.io/"$container_label":latest"
   sudo docker pull $container_name
 
