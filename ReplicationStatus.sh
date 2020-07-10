@@ -25,11 +25,11 @@ if [ $? -eq 0 ]
 then
         date
         echo "Sending 0"
-        echo '{"Account":"$genevaAccount","Namespace":"GHPIMetrics","Metric":"ReplicationStatus","Dims":{"Tenant":"$tenant","Role":"GHPI","Role_Instance":"$roleInstance"}}:0|g' | socat -t 1 - UDP-SENDTO:127.0.0.1:8126
+        echo "{\"Account\":\"$genevaAccount\",\"Namespace\":\"GHPIMetrics\",\"Metric\":\"ReplicationStatus\",\"Dims\":{\"Tenant\":\"$tenant\",\"Role\":\"GHPI\",\"Role_Instance\":\"$roleInstance\"}}:0|g" | socat -t 1 - UDP-SENDTO:127.0.0.1:8126
 
 else
       date
        echo "Sending 1"
-       echo '{"Account":"$genevaAccount","Namespace":"GHPIMetrics","Metric":"ReplicationStatus","Dims":{"Tenant":"$tenant","Role":"GHPI","Role_Instance":"$roleInstance"}}:1|g' | socat -t 1 - UDP-SENDTO:127.0.0.1:8126
+       echo "{\"Account\":\"$genevaAccount\",\"Namespace\":\"GHPIMetrics\",\"Metric\":\"ReplicationStatus\",\"Dims\":{\"Tenant\":\"$tenant\",\"Role\":\"GHPI\",\"Role_Instance\":\"$roleInstance\"}}:1|g" | socat -t 1 - UDP-SENDTO:127.0.0.1:8126
 
 fi
