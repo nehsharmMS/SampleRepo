@@ -285,6 +285,7 @@ MyContainerId="$(sudo docker run -it --privileged --rm -d --network host --name 
     
     sudo docker cp /tmp/collectd $MyContainerId:/etc/default/collectd
     sudo docker cp /tmp/mdsd $MyContainerId:/etc/default/mdsd
+    sudo docker exec  $MyContainerId  bash -c 'source /root/EnvVariables.sh;  ./RunMonAgents/RunMonAgents.sh >> /tmp/crontab.logs'
     sudo docker exec -itd $MyContainerId bash -c '/etc/init.d/cron start'
     
  echo -e "Setting up of Monitoring container is successful.\n"
